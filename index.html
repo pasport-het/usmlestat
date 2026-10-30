@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>USMLE Progress</title>
+<meta name="theme-color" content="#F3F4F8">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="USMLE">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+  :root{--bg:#F3F4F8;--card:#fff;--ink:#0B1220;--muted:#667085;--line:#E7EAF0;--blue:#2563EB;--red:#DC2626;--field:#F6F7FB}
+  :root[data-theme=dark]{--bg:#080C16;--card:#111827;--ink:#EEF2FA;--muted:#93A0B8;--line:#1F2A40;--blue:#6B9BFF;--red:#FF7272;--field:#172033}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:var(--bg);color:var(--ink);transition:background .25s,color .25s}
+  body{font-family:Inter,-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,Arial,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;overflow:hidden}
+  #shell{position:fixed;inset:0;padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left);background:var(--bg)}
+  #app{width:100%;height:100%;border:0;display:block;background:transparent}
+  .panel{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;background:var(--bg);z-index:10;overflow:auto}
+  .panel.on{display:flex}
+  .box{width:100%;max-width:440px;background:var(--card);border-radius:24px;padding:26px 22px;box-shadow:0 12px 36px rgba(16,24,40,.12)}
+  .box h1{font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
+  .box p{color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:14px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:12px 0 6px}
+  input{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:13px;font-size:16px;font-family:inherit;background:var(--field);color:var(--ink);outline:none}
+  input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(37,99,235,.12)}
+  .btn{display:block;width:100%;margin-top:16px;padding:13px;border:0;border-radius:13px;background:var(--blue);color:#fff;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--blue);margin-top:6px}
+  .btn.red{background:transparent;color:var(--red);margin-top:4px;font-weight:600;font-size:13.5px}
+  .err{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+  .sep{text-align:center;color:var(--muted);font-size:12px;margin:14px 0 0}
+  #splash{flex-direction:column;text-align:center;transition:opacity .35s;z-index:20} #splash.out{opacity:0;pointer-events:none}
+  .slw{display:flex;flex-direction:column;align-items:center;gap:18px;animation:slIn .45s ease-out both}
+  .slogo{width:92px;height:92px;display:block;filter:drop-shadow(0 10px 22px rgba(37,99,235,.35))}
+  .slogo .ring{transform-origin:60px 60px;animation:slSpin 2.2s linear infinite 1.2s}
+  .slogo .arc{stroke-dasharray:207.35;stroke-dashoffset:207.35;animation:slArc 1.1s cubic-bezier(.4,0,.2,1) .15s forwards}
+  .slogo .dot{transform-origin:60px 60px;transform:scale(0);animation:slDot .5s cubic-bezier(.34,1.56,.64,1) .35s forwards}
+  .slt{font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  @keyframes slIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+  @keyframes slArc{to{stroke-dashoffset:56}}
+  @keyframes slDot{to{transform:scale(1)}}
+  @keyframes slSpin{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
+  .sum{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
+  .sum div{background:var(--field);border-radius:14px;padding:11px 13px} .sum b{display:block;font-size:20px;font-weight:800;letter-spacing:-.03em} .sum span{font-size:12px;color:var(--muted)}
+  .steps{margin:6px 0 4px 20px;color:var(--ink);font-size:14.5px;line-height:1.8}
+  .toast{position:fixed;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));margin:auto;max-width:380px;background:rgba(17,28,50,.96);color:#fff;text-align:center;padding:12px 18px;border-radius:14px;font-weight:600;font-size:14px;z-index:30;opacity:0;visibility:hidden;transform:translateY(12px);transition:.25s}
+  .toast.on{opacity:1;visibility:visible;transform:none}
+  .ico{display:inline-block;width:18px;height:18px;vertical-align:-3px}
+  .pushov{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(8,12,22,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  .pushov.on{display:flex}
+  .pushc{background:var(--card,#fff);color:var(--ink,#0F172A);border-radius:24px;padding:26px 22px 20px;width:100%;max-width:360px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.4)}
+  .pushc .pic{width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+  .pushc .pic svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .pushc h2{margin:0 0 8px;font-size:20px;letter-spacing:-.02em} .pushc p{margin:0 0 18px;color:var(--muted,#64748B);font-size:15px;line-height:1.5}
+  .pbtn{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;background:#2563EB;color:#fff;font-family:inherit;margin-top:8px;min-height:48px}
+  .pbtn.ghost{background:transparent;color:var(--muted,#64748B)} .pbtn:disabled{opacity:.6;cursor:default}
+</style>
+</head>
+<body>
+<div id="shell"><iframe id="app" title="USMLE Progress" allow="clipboard-write; fullscreen" referrerpolicy="origin"></iframe></div>
+
+<div class="panel" id="splash" role="status" aria-label="USMLE Progress"><div class="slw"><svg class="slogo" viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="lgG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#1D4ED8"/></linearGradient></defs><rect width="120" height="120" rx="27" fill="url(#lgG)"/><g class="ring"><circle cx="60" cy="60" r="33" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="10"/><circle class="arc" cx="60" cy="60" r="33" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" transform="rotate(-90 60 60)"/></g><circle class="dot" cx="60" cy="60" r="8.5" fill="#fff"/></svg><div class="slt">USMLE Progress</div></div></div>
+
+<div class="panel" id="setup"><div class="box">
+  <h1 id="sT"></h1><p id="sD"></p>
+  <label id="sLinkL"></label><input id="sLink" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <div class="sep" id="sOr"></div>
+  <label id="sUrlL"></label><input id="sUrl" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
+  <label id="sKeyL"></label><input id="sKey" autocomplete="off" autocapitalize="off" spellcheck="false" type="password">
+  <div class="err" id="sErr"></div>
+  <button class="btn" id="sBtn"></button>
+</div></div>
+
+<div class="panel" id="slow"><div class="box">
+  <h1 id="wT"></h1><p id="wD"></p>
+  <button class="btn" id="wRetry"></button><button class="btn red" id="wReset"></button>
+</div></div>
+
+<div class="panel" id="offline"><div class="box">
+  <h1 id="oT"></h1><p id="oD"></p><div class="sum" id="oSum"></div><p id="oAt" style="margin:8px 0 0;font-size:12.5px"></p>
+  <button class="btn" id="oRetry"></button>
+</div></div>
+
+<div class="panel" id="iosHelp"><div class="box">
+  <h1 id="iT"></h1>
+  <ol class="steps"><li id="i1"></li><li id="i2"></li><li id="i3"></li></ol>
+  <p id="iN" style="margin-top:10px"></p><button class="btn" id="iOk"></button>
+</div></div>
+<div class="panel" id="badLink"><div class="box"><h1 id="bT"></h1><p id="bD"></p></div></div>
+<div class="panel" id="genHelp"><div class="box"><h1 id="gT"></h1><p id="gD"></p><button class="btn" id="gOk"></button></div></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="pushov" id="pushOv" role="dialog" aria-modal="true" aria-labelledby="pT"><div class="pushc"><div class="pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16v-5a6 6 0 1 0-12 0v5l-2 2h16z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></div><h2 id="pT"></h2><p id="pD"></p><button class="pbtn" id="pGo"></button><button class="pbtn ghost" id="pNo"></button></div></div>
+
+<script>
+(function () {
+  'use strict';
+  var WRAP_V = '2026-10-30.1';                                      // версия оболочки: обновляется при каждом выпуске вместе с version.json
+  var SHARE = null;                                                  // режим ссылки для друга: { exec, tok }
+  var K_U = 'trf_exec', K_K = 'trf_key', K_L = 'trf_lang', K_S = 'trf_summary', K_P = 'trf_vapid';
+  var HK = window.__TRF || {};                                   // переопределения для автотестов
+  var SLOW_MS = window.__TRF_SLOW || HK.slow || 20000;
+  var SPLASH_MIN = HK.min != null ? HK.min : 700, SPLASH_FADE = HK.fade != null ? HK.fade : 350;
+  var $ = function (id) { return document.getElementById(id); };
+  function LS(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } return null; }
+
+  var ua = navigator.userAgent || '';
+  var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  var deferred = null, readyTimer = null, loaded = false, everLoaded = false, splashAt = 0, splashT = null;
+
+  /* ---------- тексты ---------- */
+  var T = {
+    ru: {
+      bT: 'Ссылка недействительна', bD: 'Эта ссылка повреждена или устарела. Попросите у владельца новую.', copied: 'Ссылка скопирована', copyFail: 'Не удалось скопировать: скопируйте ссылку вручную', upUpdating: 'Вышла новая версия — обновляю…', upFail: 'Не удалось проверить обновления. Проверьте интернет.', upLatest: 'Установлена последняя версия', pT: 'Уведомления', pD: 'Разреши уведомления, чтобы напоминания о событиях приходили на это устройство, даже когда приложение закрыто.', pGo: 'Разрешить', pNo: 'Не сейчас',
+      pOk: 'Готово: уведомления включены', pDenied: 'Уведомления запрещены в настройках. Разреши их и попробуй снова.', pUnsup: 'Это устройство или браузер не поддерживает уведомления.', pPwa: 'На iPhone уведомления работают только в приложении, добавленном на экран «Домой».', pErr: 'Не удалось подключить уведомления. Попробуй ещё раз.', pNoKey: 'Нет ключа уведомлений. Обнови страницу приложения.', pOff: 'Уведомления отключены',
+      sT: 'Подключение', sD: 'Вставь ссылку из таблицы: меню «📈 USMLE Progress → Открыть отчёт». В ней уже есть адрес и ключ — больше ничего вводить не нужно.',
+      sLinkL: 'Ссылка из меню таблицы', sOr: 'или впиши отдельно', sUrlL: 'Адрес веб-приложения (…/exec)', sKeyL: 'Ключ', sBtn: 'Подключить',
+      eUrl: 'Не нашёл адрес вида https://script.google.com/macros/s/…/exec', eDev: 'Это тестовый адрес (…/dev). Нужен рабочий — он заканчивается на /exec.', eKey: 'Не хватает ключа: вставь ссылку целиком или впиши ключ отдельно.',
+      wT: 'Долго загружается…', wD: 'Проверь интернет и что у развёртывания в Apps Script доступ «Who has access: Anyone».', wRetry: 'Повторить', wReset: 'Сбросить подключение',
+      oT: 'Нет интернета', oD: 'Данные открываются онлайн. Последние сохранённые цифры:', oRetry: 'Повторить', oNone: 'Сохранённых цифр пока нет — они появятся после первого открытия с интернетом.', oAt: 'Обновлено: {0}',
+      sumReady: 'Готовность', sumDays: 'Дней до экзамена', sumFa: 'First Aid', sumUw: 'UWorld', sumNb: 'NBME', sumAnki: 'Anki сегодня',
+      iT: 'Установка на iPhone / iPad', i1: 'Нажми «Поделиться» ⬆︎ в панели Safari', i2: 'Выбери «На экран «Домой»»', i3: 'Нажми «Добавить»', iN: 'Работает только из Safari — не из встроенного браузера мессенджеров.', ok: 'Понятно',
+      gT: 'Установка приложения', gD: 'Открой меню браузера (⋮) и выбери «Установить приложение» или «Добавить на главный экран».', already: 'Приложение уже установлено', installed: 'Приложение установлено' },
+    en: {
+      bT: 'Link is not valid', bD: 'This link is broken or out of date. Ask the owner for a new one.', copied: 'Link copied', copyFail: 'Could not copy: copy the link manually', upUpdating: 'A new version is out — updating…', upFail: 'Could not check for updates. Check your connection.', upLatest: 'You have the latest version', pT: 'Notifications', pD: 'Allow notifications so event reminders reach this device even when the app is closed.', pGo: 'Allow', pNo: 'Not now',
+      pOk: 'Done: notifications are on', pDenied: 'Notifications are blocked in settings. Allow them and try again.', pUnsup: 'This device or browser does not support notifications.', pPwa: 'On iPhone notifications only work in the app added to the Home Screen.', pErr: 'Could not enable notifications. Please try again.', pNoKey: 'No notification key. Refresh the app page.', pOff: 'Notifications turned off',
+      sT: 'Connect', sD: 'Paste the link from your sheet: menu “📈 USMLE Progress → Open report”. It already contains the address and the key — nothing else to type.',
+      sLinkL: 'Link from the sheet menu', sOr: 'or enter separately', sUrlL: 'Web app address (…/exec)', sKeyL: 'Key', sBtn: 'Connect',
+      eUrl: 'Could not find an address like https://script.google.com/macros/s/…/exec', eDev: 'This is a test address (…/dev). You need the live one — it ends with /exec.', eKey: 'The key is missing: paste the whole link or enter the key separately.',
+      wT: 'Taking long to load…', wD: 'Check your internet and that the Apps Script deployment has “Who has access: Anyone”.', wRetry: 'Retry', wReset: 'Reset connection',
+      oT: 'You are offline', oD: 'Data opens online. Last saved numbers:', oRetry: 'Retry', oNone: 'No saved numbers yet — they appear after the first online visit.', oAt: 'Updated: {0}',
+      sumReady: 'Readiness', sumDays: 'Days to exam', sumFa: 'First Aid', sumUw: 'UWorld', sumNb: 'NBME', sumAnki: 'Anki today',
+      iT: 'Install on iPhone / iPad', i1: 'Tap “Share” ⬆︎ in the Safari toolbar', i2: 'Choose “Add to Home Screen”', i3: 'Tap “Add”', iN: 'Works only from Safari — not from in-app browsers of messengers.', ok: 'Got it',
+      gT: 'Install the app', gD: 'Open the browser menu (⋮) and choose “Install app” or “Add to Home screen”.', already: 'The app is already installed', installed: 'App installed' }
+  };
+  var lang = (LS(K_L) || (navigator.language || 'ru').slice(0, 2)) === 'en' ? 'en' : 'ru';
+  function t(k) { return (T[lang] && T[lang][k]) || T.ru[k] || k; }
+  function setText(id, key) { $(id).textContent = t(key); }
+  function applyLang() {
+    document.documentElement.lang = lang;
+    [['pT', 'pT'], ['pD', 'pD'], ['pGo', 'pGo'], ['pNo', 'pNo'], ['sT', 'sT'], ['sD', 'sD'], ['sLinkL', 'sLinkL'], ['sOr', 'sOr'], ['sUrlL', 'sUrlL'], ['sKeyL', 'sKeyL'], ['sBtn', 'sBtn'],
+     ['wT', 'wT'], ['wD', 'wD'], ['wRetry', 'wRetry'], ['wReset', 'wReset'], ['oT', 'oT'], ['oD', 'oD'], ['oRetry', 'oRetry'], ['iT', 'iT'], ['i1', 'i1'], ['i2', 'i2'], ['i3', 'i3'], ['iN', 'iN'],
+     ['iOk', 'ok'], ['gT', 'gT'], ['gD', 'gD'], ['gOk', 'ok'], ['bT', 'bT'], ['bD', 'bD']].forEach(function (p) { setText(p[0], p[1]); });
+  }
+
+  /* ---------- вспомогательное ---------- */
+  var toastT = null;
+  function toast(m) { var el = $('toast'); el.textContent = m; el.className = 'toast on'; clearTimeout(toastT); toastT = setTimeout(function () { el.className = 'toast'; }, 3000); }
+  function show(id) { ['splash', 'setup', 'slow', 'offline', 'iosHelp', 'genHelp', 'badLink'].forEach(function (p) { $(p).classList.toggle('on', p === id); }); }
+  function hide(id) { $(id).classList.remove('on'); }
+  /* Заставка с логотипом — только при входе: пока приложение ещё не отрисовалось (или перезапускается по просьбе самого сайта). */
+  function showSplash() { clearTimeout(splashT); splashAt = Date.now(); $('splash').classList.remove('out'); show('splash'); }
+  function hideSplash() {
+    var sp = $('splash'); if (!sp.classList.contains('on')) return;
+    clearTimeout(splashT);
+    splashT = setTimeout(function () {                           // не короче SPLASH_MIN, чтобы не мелькала
+      sp.classList.add('out');
+      splashT = setTimeout(function () { sp.classList.remove('on'); sp.classList.remove('out'); }, SPLASH_FADE);
+    }, Math.max(0, SPLASH_MIN - (Date.now() - splashAt)));
+  }
+  function parseExec(v) {
+    v = String(v || '').trim();
+    if (/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/dev(\?|$|#)/.test(v)) return { err: 'eDev' };
+    var m = v.match(/(https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec)(?:\?([^#\s]*))?/);
+    if (!m) return { err: 'eUrl' };
+    var key = ''; if (m[2]) { var km = m[2].match(/(?:^|&)k=([^&]+)/); if (km) { try { key = decodeURIComponent(km[1]); } catch (e) { key = km[1]; } } }
+    return { url: m[1], key: key };
+  }
+  function parseHash(h) {
+    var out = {}; String(h || '').replace(/^#/, '').split('&').forEach(function (kv) {
+      var i = kv.indexOf('='); if (i < 1) return;
+      try { out[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); } catch (e) { out[kv.slice(0, i)] = kv.slice(i + 1); }
+    }); return out;
+  }
+  function appUrl() {
+    if (SHARE) return SHARE.exec + '?s=' + encodeURIComponent(SHARE.tok) + '&emb=1&env=' + (standalone ? 'standalone' : 'browser') + '&ios=' + (isIOS ? 1 : 0);
+    return LS(K_U) + '?k=' + encodeURIComponent(LS(K_K)) + '&emb=1&env=' + (standalone ? 'standalone' : 'browser') + '&ios=' + (isIOS ? 1 : 0);
+  }
+  function okOrigin(o) {
+    try { var h = new URL(o).hostname; return h === 'script.google.com' || /\.googleusercontent\.com$/.test(h); } catch (e) { return false; }
+  }
+  function applyTheme(theme, bg) {
+    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+    if (/^#[0-9a-fA-F]{6}$/.test(bg || '')) {
+      document.documentElement.style.setProperty('--bg', bg);
+      var m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', bg);
+    }
+  }
+
+  /* ---------- подключение ---------- */
+  function connect(url, key) { LS(K_U, url); LS(K_K, key); }
+  function loadApp(restart) {
+    loaded = false;
+    var cold = !everLoaded || restart === true;
+    if (cold) showSplash(); else { hide('slow'); hide('offline'); }   // повторная загрузка после обрыва связи — без заставки
+    $('app').src = appUrl() + (restart === true ? '&r=' + Date.now() : '');
+    clearTimeout(readyTimer);
+    readyTimer = setTimeout(function () { if (!loaded && !$('offline').classList.contains('on')) show('slow'); }, SLOW_MS);
+    if (navigator.onLine === false) showOffline();
+  }
+  /* ---------- копирование, «поделиться», открытие ссылок (по просьбе внутреннего приложения) ---------- */
+  function okLink(u) { try { var x = new URL(String(u)); return x.protocol === 'https:' && (x.origin === location.origin || x.hostname === 'script.google.com'); } catch (e) { return false; } }
+  function copyText(text) {
+    function fallback() {
+      try { var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, 99999); var ok = document.execCommand('copy'); document.body.removeChild(ta); toast(ok ? t('copied') : t('copyFail')); } catch (e) { toast(t('copyFail')); }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast(t('copied')); }, fallback); else fallback();
+  }
+  function shareOut(d) {
+    var url = String(d.url || ''); if (!okLink(url)) { toast(t('copyFail')); return; }
+    if (navigator.share) navigator.share({ title: String(d.title || '').slice(0, 80), text: String(d.text || '').slice(0, 200), url: url }).catch(function () { });
+    else copyText(url);
+  }
+  /* ---------- обновление оболочки: сайт на GitHub отдаёт version.json; при расхождении страница перезагружается сама ---------- */
+  var updBusy = false, updAt = 0;
+  function reloadOnce(reason) {
+    var k = 'trf_upd_try', now = Date.now(), last = 0; try { last = +(sessionStorage.getItem(k) || 0); } catch (e) { }
+    if (now - last < 60000) return;                                   // защита от цикла перезагрузок
+    try { sessionStorage.setItem(k, String(now)); } catch (e) { }
+    toast(t('upUpdating')); setTimeout(function () { location.reload(); }, 1100);
+  }
+  function checkWrapperUpdate(manual) {
+    if (updBusy || navigator.onLine === false) { if (manual && navigator.onLine === false) toast(t('upFail')); return; }
+    updBusy = true; updAt = Date.now();
+    try { if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(function (r) { if (r) r.update().catch(function () { }); }); } catch (e) { }
+    fetch('version.json?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+      updBusy = false;
+      if (j && typeof j.v === 'string' && j.v && j.v !== WRAP_V) reloadOnce('version');
+    }).catch(function () { updBusy = false; if (manual) toast(t('upFail')); });
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && Date.now() - updAt > 10 * 60000) checkWrapperUpdate(false); });
+  setTimeout(function () { checkWrapperUpdate(false); }, 4000); setInterval(function () { if (!document.hidden) checkWrapperUpdate(false); }, 30 * 60000);
+
+  function start() {
+    var q = parseHash(location.hash), search = location.search || '';
+    if (/[?&]share=/.test(search)) {                                 // ссылка для друга: ?share=<id развёртывания>.<токен>
+      var sm = /[?&]share=([A-Za-z0-9_-]{20,140})\.([A-Za-z0-9_-]{24,64})(?:&|$)/.exec(search);
+      applyLang();
+      if (!sm) { show('badLink'); return; }
+      SHARE = { exec: 'https://script.google.com/macros/s/' + sm[1] + '/exec', tok: sm[2] }; loadApp(); return;
+    }
+    if (/[?&]reset=1/.test(search)) { LS(K_U, null); LS(K_K, null); history.replaceState(null, '', location.pathname); }
+    if (q.u && q.k) {
+      var p = parseExec(q.u);
+      if (p.url) {
+        connect(p.url, q.k);
+        // На iPhone ярлык «На экран Домой» получает отдельное хранилище, поэтому адрес и ключ оставляем во фрагменте ссылки
+        // (он не уходит на сервер и попадает в ярлык). На остальных устройствах фрагмент убираем.
+        if (!isIOS || standalone) history.replaceState(null, '', location.pathname + search);
+      }
+    }
+    applyLang();
+    if (!LS(K_U) || !LS(K_K)) { show('setup'); return; }
+    loadApp();
+  }
+  $('sBtn').addEventListener('click', function () {
+    var link = $('sLink').value.trim(), url = $('sUrl').value.trim(), key = $('sKey').value.trim(), err = $('sErr');
+    var p, k = key;
+    var hash = parseHash(link.indexOf('#') > -1 ? link.slice(link.indexOf('#')) : '');       // ссылка приложения: …/#u=<адрес>&k=<ключ>
+    if (hash.u && hash.k) { p = parseExec(hash.u); if (p.url) { p.key = hash.k; } }
+    else p = parseExec(link || url);
+    if (p.err) { err.textContent = t(p.err); return; }
+    k = key || p.key; if (!k) { err.textContent = t('eKey'); return; }
+    err.textContent = ''; connect(p.url, k); loadApp();
+  });
+  $('wRetry').addEventListener('click', loadApp);
+  $('wReset').addEventListener('click', function () { LS(K_U, null); LS(K_K, null); show('setup'); });
+
+
+  /* ---------- уведомления (Web Push) ---------- */
+  var pushPub = '', pushSynced = false;
+  function pushSupported() { return ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window); }
+  function b64uToU8(x) { x = String(x).replace(/-/g, '+').replace(/_/g, '/'); while (x.length % 4) x += '='; var raw = atob(x), a = new Uint8Array(raw.length); for (var i = 0; i < raw.length; i++) a[i] = raw.charCodeAt(i); return a; }
+  function sameKey(sub, key) {
+    try { var cur = sub.options && sub.options.applicationServerKey; if (!cur) return true; var a = new Uint8Array(cur); if (a.length !== key.length) return false; for (var i = 0; i < a.length; i++) if (a[i] !== key[i]) return false; return true; } catch (e) { return true; }
+  }
+  function postServer(obj) {                                         // отправка на сервер без ответа: sendBeacon, при неудаче — fetch no-cors
+    var u = LS(K_U), k = LS(K_K); if (!u || !k) return;
+    obj.key = k; var body = JSON.stringify(obj), ok = false;
+    try { ok = !!(navigator.sendBeacon && navigator.sendBeacon(u, new Blob([body], { type: 'text/plain;charset=UTF-8' }))); } catch (e) { }
+    if (!ok) { try { fetch(u, { method: 'POST', mode: 'no-cors', keepalive: true, body: body }); } catch (e) { } }
+  }
+  function sendSub(sub) {
+    var j = (sub && sub.toJSON) ? sub.toJSON() : sub; if (!j || !j.endpoint || !j.keys || !j.keys.p256dh || !j.keys.auth) return;
+    postServer({ push: { endpoint: j.endpoint, keys: { p256dh: j.keys.p256dh, auth: j.keys.auth } }, ua: String(navigator.userAgent || '').slice(0, 80) });
+  }
+  function closePushAsk() { $('pushOv').classList.remove('on'); $('pGo').disabled = false; }
+  function showPushAsk(pub) {
+    if (pub && /^[A-Za-z0-9_-]{80,100}$/.test(pub)) { pushPub = pub; LS(K_P, pub); }
+    if (!pushPub) pushPub = LS(K_P) || '';
+    if (!pushSupported()) { toast(t('pUnsup')); return; }
+    if (isIOS && !standalone) { toast(t('pPwa')); return; }
+    if (!pushPub) { toast(t('pNoKey')); return; }
+    $('pushOv').classList.add('on'); try { $('pGo').focus(); } catch (e) { }
+  }
+  function subscribePush() {
+    $('pGo').disabled = true;
+    var key = b64uToU8(pushPub);
+    var perm; try { perm = Notification.requestPermission(); } catch (e) { perm = Promise.reject(e); }   // вызывается прямо при нажатии: иначе iPhone откажет
+    Promise.resolve(perm).then(function (p) {
+      if (p !== 'granted') throw 'denied';
+      return navigator.serviceWorker.ready;
+    }).then(function (reg) {
+      return reg.pushManager.getSubscription().then(function (sub) {
+        if (sub && !sameKey(sub, key)) return sub.unsubscribe().then(function () { return null; });          // ключ сервера сменился — подписываемся заново
+        return sub;
+      }).then(function (sub) { return sub || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }); });
+    }).then(function (sub) { sendSub(sub); closePushAsk(); toast(t('pOk')); })
+      .catch(function (e) { $('pGo').disabled = false; toast(t(e === 'denied' ? 'pDenied' : 'pErr')); });
+  }
+  function pushOff() {
+    if (!pushSupported()) return;
+    navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); }).then(function (sub) {
+      if (!sub) return; var ep = sub.endpoint; return sub.unsubscribe().then(function () { postServer({ pushOff: { endpoint: ep } }); });
+    }).then(function () { toast(t('pOff')); }).catch(function () { });
+  }
+  function syncPush() {
+    if (SHARE) return;                                               // друг по ссылке: уведомления и ключи владельца не трогаем
+                                                   // раз за запуск подтверждаем серверу подписку (если он её потерял)
+    if (pushSynced || !pushSupported() || typeof Notification === 'undefined' || Notification.permission !== 'granted') return; pushSynced = true;
+    navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); }).then(function (sub) { if (sub) sendSub(sub); }).catch(function () { });
+  }
+  $('pGo').addEventListener('click', subscribePush);
+  $('pNo').addEventListener('click', closePushAsk);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePushAsk(); });
+
+  /* ---------- сообщения от сайта ---------- */
+  window.addEventListener('message', function (e) {
+    if (!okOrigin(e.origin)) return;
+    var d = e.data; if (!d || d.trf !== 1) return;
+    if (d.type === 'trf-ready') { loaded = true; everLoaded = true; clearTimeout(readyTimer); hideSplash(); hide('slow'); syncPush(); }
+    else if (d.type === 'trf-reload') loadApp(true);
+    else if (d.type === 'trf-theme') applyTheme(d.theme, d.bg);
+    else if (d.type === 'trf-prefs') { if (d.lang === 'en' || d.lang === 'ru') { lang = d.lang; LS(K_L, lang); applyLang(); } }
+    else if (d.type === 'trf-summary' && d.s) LS(K_S, JSON.stringify({ at: Date.now(), s: d.s }));
+    else if (d.type === 'trf-install') install();
+    else if (d.type === 'trf-push-enable') showPushAsk(String(d.pub || ''));
+    else if (d.type === 'trf-copy') copyText(String(d.text || ''));
+    else if (d.type === 'trf-share') shareOut(d);
+    else if (d.type === 'trf-open') { if (okLink(d.url)) window.open(d.url, '_blank', 'noopener'); }
+    else if (d.type === 'trf-check-update') checkWrapperUpdate(true);
+    else if (d.type === 'trf-push-off') pushOff();
+  });
+  $('app').addEventListener('load', function () {                      // страница загрузилась, но «готов» мог не прийти (старая версия сайта)
+    setTimeout(function () { if (!loaded) { loaded = true; everLoaded = true; clearTimeout(readyTimer); hideSplash(); } }, 2500);
+  });
+
+  /* ---------- установка ---------- */
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; });
+  window.addEventListener('appinstalled', function () { deferred = null; toast(t('installed')); });
+  function install() {
+    if (standalone) { toast(t('already')); return; }
+    if (deferred) { var d = deferred; deferred = null; d.prompt(); if (d.userChoice && d.userChoice.then) d.userChoice.then(function () { }); return; }
+    show(isIOS ? 'iosHelp' : 'genHelp');
+  }
+  $('iOk').addEventListener('click', function () { hide('iosHelp'); });
+  $('gOk').addEventListener('click', function () { hide('genHelp'); });
+
+  /* ---------- нет интернета ---------- */
+  function showOffline() {
+    var box = $('oSum'), raw = LS(K_S), data = null; try { data = raw ? JSON.parse(raw) : null; } catch (e) { data = null; }
+    box.innerHTML = '';
+    if (data && data.s) {
+      var s = data.s, items = [[t('sumReady'), s.ready + '%'], [t('sumDays'), s.days == null ? '—' : s.days], [t('sumFa'), s.fa + '%'], [t('sumUw'), s.uw + '%'],
+        [t('sumNb'), s.nbme == null ? '—' : s.nbme], [t('sumAnki'), s.ankiToday == null ? '—' : s.ankiToday]];
+      items.forEach(function (it) { var d = document.createElement('div'), b = document.createElement('b'), sp = document.createElement('span'); b.textContent = it[1]; sp.textContent = it[0]; d.appendChild(b); d.appendChild(sp); box.appendChild(d); });
+      var dt = new Date(data.at); $('oAt').textContent = t('oAt').replace('{0}', dt.toLocaleString(lang === 'en' ? 'en-GB' : 'ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }));
+    } else { $('oAt').textContent = t('oNone'); }
+    show('offline');
+  }
+  $('oRetry').addEventListener('click', function () { if (navigator.onLine === false) toast(t('oT')); else { hide('offline'); loadApp(); } });
+  window.addEventListener('offline', showOffline);
+  window.addEventListener('online', function () { if ($('offline').classList.contains('on')) { hide('offline'); loadApp(); } });
+
+  if ('serviceWorker' in navigator) { try { var hadCtl = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (reg) { try { reg.update(); } catch (e) { } }).catch(function () { });
+      navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadCtl) reloadOnce('sw'); });          /* новый воркер вступил в силу → подхватываем свежую страницу */
+      } catch (e) { } }
+  start();
+})();
+</script>
+</body>
+</html>
