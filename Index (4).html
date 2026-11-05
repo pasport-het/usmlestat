@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Слова</title>
+<style>
+:root{--bg:#F4F6FB;--card:#FFFFFF;--ink:#0F172A;--ink2:#334155;--muted:#5A6478;--line:#E3E8F2;--blue:#2563EB;--blue-btn:#2563EB;--blue-s:#E8F0FE;--green:#16A34A;--green-t:#0F7A38;--red:#DC2626;--red-t:#B91C1C;--amber-t:#9A5B05;--neutral:#EEF1F7;--fz:1;--r:18px;--sh:0 1px 2px rgba(15,23,42,.05),0 8px 24px rgba(15,23,42,.06);--wl:38%;--ws:72%}
+:root[data-theme=dark]{--bg:#0A0F1C;--card:#121A2B;--ink:#F1F5F9;--ink2:#CBD5E1;--muted:#93A0B8;--line:#222C42;--blue:#5B8DEF;--blue-btn:#2F5FD6;--blue-s:#16264A;--green:#3DD68C;--green-t:#4ADE80;--red:#FF7272;--red-t:#FF7272;--amber-t:#F6B94D;--neutral:#1A2438;--sh:0 1px 2px rgba(0,0,0,.3);--wl:72%;--ws:78%}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:calc(16px*var(--fz))/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{overflow:hidden}
+button,input,textarea,select{font:inherit;color:inherit}
+.hide{display:none!important}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+header{flex:0 0 auto;padding:calc(12px + env(safe-area-inset-top,0px)) 18px 6px;display:flex;align-items:center;gap:10px}
+header h1{margin:0;font-size:calc(24px*var(--fz));font-weight:800;letter-spacing:-.02em;flex:1}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-weight:700;font-size:calc(13px*var(--fz));color:var(--ink2);white-space:nowrap}
+main{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;padding:8px 16px 24px;-webkit-overflow-scrolling:touch;overscroll-behavior:none}
+.page{display:none;max-width:640px;margin:0 auto}.page.on{display:block}
+nav{flex:0 0 auto;display:flex;gap:2px;padding:6px 8px calc(8px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--line)}
+nav button{flex:1;border:0;background:none;padding:7px 2px 5px;border-radius:12px;color:var(--muted);font-size:calc(11.5px*var(--fz));font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+nav button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--blue);background:var(--blue-s)}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:18px;margin-bottom:14px}
+.btn{border:0;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer;background:var(--neutral);color:var(--ink);min-height:44px}
+.btn.b{background:var(--blue-btn);color:#fff}.btn.red{color:var(--red-t)}.btn:disabled{opacity:.5}
+.hint{color:var(--muted);font-size:calc(13.5px*var(--fz));line-height:1.5}
+label{display:block;font-size:calc(13px*var(--fz));font-weight:700;color:var(--ink2);margin:14px 0 6px}
+input,textarea,select{width:100%;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 13px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+textarea{min-height:140px;resize:vertical;font-family:ui-monospace,Menlo,monospace;font-size:calc(14px*var(--fz))}
+/* карточка слова */
+#wcard{--h:210;--wc:#1d4ed8;padding:22px 20px 18px;text-align:left;position:relative;overflow:hidden}
+#wcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:hsl(var(--h) 75% 52%)}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tag{font-size:calc(12.5px*var(--fz));font-weight:800;border-radius:8px;padding:3px 9px;background:var(--neutral);color:var(--ink2);letter-spacing:.02em}
+.tag.hue{background:hsl(var(--h) 80% 50% / .15);color:var(--wc)}
+#wWord{font-size:calc(46px*var(--fz));line-height:1.08;font-weight:800;letter-spacing:-.02em;color:var(--wc);overflow-wrap:anywhere;margin:2px 0 2px}
+#wIpa{color:var(--muted);font-size:calc(15px*var(--fz));min-height:1.2em}
+#wTr{font-size:calc(26px*var(--fz));font-weight:700;margin:12px 0 8px;line-height:1.25}
+#wExp{font-size:calc(16.5px*var(--fz));color:var(--ink2);line-height:1.55}
+#wEx{margin-top:12px;padding:11px 13px;border-radius:12px;background:var(--bg);font-size:calc(15.5px*var(--fz));color:var(--ink2);line-height:1.55}
+#wEx mark{background:hsl(var(--h) 80% 50% / .22);color:inherit;border-radius:4px;padding:0 3px;font-weight:700}
+.veil #wTr,.veil #wExp,.veil #wEx{filter:blur(9px);user-select:none;cursor:pointer}
+.reveal{margin-top:10px}
+.row{display:flex;gap:10px;align-items:center}
+.nav{display:flex;align-items:center;gap:10px;margin:14px 0 4px}
+.nav .btn{width:48px;padding:0;display:flex;align-items:center;justify-content:center}
+.nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#wTimer{flex:1;text-align:center;font-weight:800;font-variant-numeric:tabular-nums;font-size:calc(15px*var(--fz));color:var(--ink2)}
+.bar{height:6px;border-radius:99px;background:var(--neutral);overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--blue);border-radius:99px;transition:width .6s linear}
+.dots{display:flex;gap:5px;flex-wrap:wrap;margin:12px 0 2px}.dots i{width:9px;height:9px;border-radius:50%;background:var(--neutral)}.dots i.done{background:var(--green)}.dots i.cur{outline:2px solid var(--blue);outline-offset:1px}
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.grades button{padding:10px 2px;border-radius:14px;border:0;background:var(--neutral);font-weight:800;cursor:pointer;display:flex;flex-direction:column;gap:2px;align-items:center;min-height:56px}
+.grades button small{font-weight:600;color:var(--muted);font-size:calc(11.5px*var(--fz))}
+.grades .g1{color:var(--red-t)}.grades .g3{color:var(--blue)}.grades .g4{color:var(--green-t)}.grades .g2{color:var(--amber-t)}
+.wrow{display:flex;gap:12px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.wrow:last-child{border-bottom:0}
+.wrow .dot{width:10px;height:10px;border-radius:50%;background:hsl(var(--h) 75% 52%);flex:0 0 auto}
+.wrow b{font-size:calc(17px*var(--fz))}.wrow .t{color:var(--muted);font-size:calc(14px*var(--fz));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrow .m{flex:1;min-width:0}.wrow .ok{color:var(--green-t);font-weight:800}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px}.chips button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font-weight:700;color:var(--ink2);white-space:nowrap;cursor:pointer}.chips button.on{background:var(--blue-btn);color:#fff;border-color:var(--blue-btn)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.kpi{background:var(--card);border-radius:16px;padding:14px;box-shadow:var(--sh)}.kpi .k{color:var(--muted);font-size:calc(13px*var(--fz));font-weight:700}.kpi .v{font-size:calc(28px*var(--fz));font-weight:800;margin-top:2px}
+.bars{display:flex;align-items:flex-end;gap:5px;height:110px;margin-top:10px}.bars div{flex:1;background:var(--blue-s);border-radius:6px 6px 2px 2px;position:relative;min-height:3px}.bars div i{position:absolute;left:0;right:0;bottom:0;background:var(--blue);border-radius:6px 6px 2px 2px}
+.bars-l{display:flex;gap:5px;color:var(--muted);font-size:calc(10.5px*var(--fz));margin-top:4px}.bars-l span{flex:1;text-align:center}
+h2{font-size:calc(18px*var(--fz));margin:0 0 4px;font-weight:800}
+.seg{display:flex;background:var(--neutral);border-radius:12px;padding:3px}.seg button{flex:1;border:0;background:none;padding:9px;border-radius:10px;font-weight:700;color:var(--muted);cursor:pointer}.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.g2c{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.g2c>div{min-width:0}input[type=time],input[type=number]{min-width:0}
+#sheetBg{position:fixed;inset:0;background:rgba(10,15,28,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+#sheetBg.on{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-height:92%;background:var(--card);border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.9,.3,1);z-index:21;overflow-y:auto;max-width:680px;margin:0 auto}
+#sheet.on{transform:none}
+#sheet .top{display:flex;align-items:center;margin-bottom:8px}#sheet .top h2{flex:1;margin:0}
+#toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#0F172A;color:#fff;padding:11px 16px;border-radius:14px;font-weight:600;font-size:calc(14px*var(--fz));opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:88%;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.empty{text-align:center;padding:36px 10px;color:var(--muted)}.empty b{display:block;color:var(--ink);font-size:calc(18px*var(--fz));margin-bottom:6px}
+.pv{max-height:150px;overflow:auto;font-size:calc(13.5px*var(--fz));border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-top:10px}
+.pv div{padding:3px 0;border-bottom:1px dashed var(--line)}.pv div:last-child{border:0}
+.sp{animation:sp .9s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header><h1 id="title">Слова</h1><span class="chip" id="chip"></span></header>
+  <main id="main">
+    <section class="page on" id="p-now"></section>
+    <section class="page" id="p-today"></section>
+    <section class="page" id="p-words"></section>
+    <section class="page" id="p-more"></section>
+  </main>
+  <nav id="nav">
+    <button data-go="now" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h10M7 13h6"/></svg>Сейчас</button>
+    <button data-go="today"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>Сегодня</button>
+    <button data-go="words"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 10h16M4 15h10M4 20h7"/></svg>Слова</button>
+    <button data-go="more"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>Ещё</button>
+  </nav>
+</div>
+<div id="sheetBg"></div><div id="sheet" role="dialog" aria-modal="true"><div class="top"><h2 id="sheetT"></h2><button class="btn" id="sheetX" aria-label="Закрыть">✕</button></div><div id="sheetB"></div></div>
+<div id="toast" role="status"></div>
+<script>
+var VIEW_KEY = <?!= viewKeyJs ?>;
+var ENV = <?!= envJs ?>;
+var INIT = <?!= initJs ?>;
+var WIDGET_TPL = "// Слова — виджет для Scriptable (экран блокировки и «Домой»). Слово меняется каждые N минут, как в приложении.\n// Установка: приложение Scriptable → «+» → вставить этот код → назвать «Слова». Затем добавить виджет Scriptable и выбрать этот скрипт.\nconst API = '__API__', KEY = '__KEY__', APP = '__APP__';\nconst fm = FileManager.local(), CACHE = fm.joinPath(fm.documentsDirectory(), 'words-cache.json');\nconst pad = n => String(n).padStart(2, '0');\n\nasync function load() {\n  const d = new Date(), m = d.getHours() * 60 + d.getMinutes(), day = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());\n  try {\n    const r = new Request(API + '?widget=1&k=' + encodeURIComponent(KEY) + '&d=' + day + '&m=' + m); r.timeoutInterval = 15;\n    const j = await r.loadJSON();\n    if (j && j.ok) { fm.writeString(CACHE, JSON.stringify(j)); return j; }\n  } catch (e) { /* нет сети — покажем последнее сохранённое */ }\n  try { return JSON.parse(fm.readString(CACHE)); } catch (e) { return null; }\n}\nfunction hslHex(h, s, l) {\n  s /= 100; l /= 100; const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l), f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));\n  const x = v => pad(Math.round(255 * v).toString(16)); return '#' + x(f(0)) + x(f(8)) + x(f(4));\n}\nfunction nextDate(j) { const t = new Date(); t.setHours(0, 0, 0, 0); return new Date(t.getTime() + j.nextAtMin * 60000); }\nfunction cut(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }\n\nfunction build(j, family) {\n  const w = new ListWidget(); w.url = APP || ''; w.refreshAfterDate = j && !j.empty ? nextDate(j) : new Date(Date.now() + 15 * 60000);\n  const fam = family || 'medium';\n  if (!j || j.empty) { const t = w.addText(j ? 'Добавьте слова в приложении' : 'Нет данных'); t.font = Font.semiboldSystemFont(13); return w; }\n  const c = j.word, hue = c.hue, light = fam.indexOf('accessory') === 0;\n  if (fam === 'accessoryInline') { const t = w.addText(cut(c.word + ' — ' + c.tr, 40)); t.font = Font.semiboldSystemFont(13); return w; }\n  if (fam === 'accessoryCircular') { w.addAccessoryWidgetBackground = true; const t = w.addText(cut(c.word, 7)); t.font = Font.boldSystemFont(12); t.centerAlignText(); return w; }\n  if (fam === 'accessoryRectangular') {\n    const a = w.addText(cut(c.word, 22)); a.font = Font.boldSystemFont(15); const b = w.addText(cut(c.tr, 34)); b.font = Font.semiboldSystemFont(12);\n    if (c.exp) { const e = w.addText(cut(c.exp, 60)); e.font = Font.systemFont(10); e.minimumScaleFactor = 0.8; } return w;\n  }\n  const g = new LinearGradient(); g.colors = [new Color(hslHex(hue, 70, 22)), new Color(hslHex((hue + 30) % 360, 70, 12))]; g.locations = [0, 1]; w.backgroundGradient = g;\n  w.setPadding(14, 14, 12, 14);\n  const top = w.addText(c.pos ? c.pos + '  ·  ' + j.idx + '/' + j.n : j.idx + '/' + j.n); top.font = Font.mediumSystemFont(11); top.textColor = new Color('#FFFFFF', 0.7);\n  w.addSpacer(4);\n  const word = w.addText(c.word); word.font = Font.heavySystemFont(fam === 'small' ? 26 : 34); word.textColor = new Color(hslHex(hue, 85, 80)); word.minimumScaleFactor = 0.5; word.lineLimit = 1;\n  if (c.ipa && fam !== 'small') { const ip = w.addText(c.ipa); ip.font = Font.systemFont(12); ip.textColor = new Color('#FFFFFF', 0.6); }\n  w.addSpacer(4);\n  const tr = w.addText(c.tr); tr.font = Font.boldSystemFont(fam === 'small' ? 15 : 19); tr.textColor = Color.white(); tr.minimumScaleFactor = 0.6; tr.lineLimit = fam === 'small' ? 2 : 1;\n  if (fam !== 'small') {\n    if (c.exp) { w.addSpacer(3); const e = w.addText(cut(c.exp, fam === 'large' ? 220 : 110)); e.font = Font.systemFont(12); e.textColor = new Color('#FFFFFF', 0.82); e.lineLimit = fam === 'large' ? 6 : 2; }\n    if (c.ex && fam === 'large') { w.addSpacer(8); const x = w.addText(cut(c.ex, 140)); x.font = Font.italicSystemFont(12); x.textColor = new Color('#FFFFFF', 0.7); }\n  }\n  w.addSpacer();\n  return w;\n}\nconst data = await load(), widget = build(data, config.widgetFamily);\nif (config.runsInWidget) Script.setWidget(widget); else { await widget.presentMedium(); }\nScript.complete();\n";
+var D = null, S = { page: 'now', off: 0, lastSlot: -1, reveal: false, filter: 'all', q: '', train: null, busy: false };
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function LS(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } return null; }
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+function localToday() { var d = new Date(); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function nowSec() { var d = new Date(); return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds(); }
+function tmin(s) { var m = /^(\d{1,2}):(\d{2})$/.exec(String(s)); return m ? (+m[1]) * 60 + (+m[2]) : -1; }
+function postTop(m) { try { if (window.top !== window) window.top.postMessage(Object.assign({ trf: 1 }, m), '*'); } catch (e) { } }
+var tT = null; function toast(m, bad) { var t = $('toast'); t.textContent = m; t.style.background = bad ? '#B91C1C' : '#0F172A'; t.classList.add('on'); clearTimeout(tT); tT = setTimeout(function () { t.classList.remove('on'); }, 2600); }
+var ERR = { AUTH: 'Нет доступа: откройте приложение по своей ссылке с ключом.', STALE: 'Запись уже изменилась. Обновите.', LIMIT: 'Достигнут предел слов (5000).', ROWS: 'Нечего добавлять.', DUP: 'Такое слово уже есть.', WORD: 'Слово должно содержать латинские буквы.', SETTING: 'Недопустимое значение настройки.', GRADE: 'Недопустимая оценка.' };
+function onErr(e) { var m = String((e && e.message) || e || ''); var c = (/E_([A-Z]+)/.exec(m) || [])[1]; toast(ERR[c] || ('Не удалось выполнить' + (c ? ' (' + c + ')' : '') + '. Проверьте связь.'), true); }
+function srv(fn, o, ok, fail) { o = Object.assign({ k: VIEW_KEY, today: localToday() }, o || {}); google.script.run.withSuccessHandler(function (r) { if (ok) ok(r); }).withFailureHandler(function (e) { if (fail) fail(e); else onErr(e); })[fn](o); }
+/* ---------- расчёт слова по времени (та же формула, что на сервере и в виджете) ---------- */
+function slotCalc(st, n, nowMin) {
+  var start = tmin(st.start), end = tmin(st.end), iv = Math.max(1, st.interval), slots = Math.max(1, Math.ceil((end - start) / iv)), slot, next;
+  if (nowMin < start) { slot = 0; next = start; } else if (nowMin >= end) { slot = slots - 1; next = 1440 + start; } else { slot = Math.floor((nowMin - start) / iv); next = Math.min(end, start + (slot + 1) * iv); }
+  return { slot: slot, slots: slots, idx: n ? slot % n : 0, cycle: n ? Math.floor(slot / n) : 0, next: next, interval: iv };
+}
+function cardIntervals(w) {
+  var ease = w.ease || 2.5, ivl = w.ivl || 0, reps = w.reps || 0, CAP = 3650, hard = Math.max(1, Math.round(Math.max(ivl, 1) * 1.2));
+  var good = reps === 0 ? 1 : (reps === 1 ? 3 : Math.max(ivl + 1, Math.round(ivl * ease))); good = Math.max(good, reps >= 1 ? hard + 1 : hard);
+  var easy = reps === 0 ? 4 : Math.max(ivl + 2, Math.round(ivl * Math.min(3.5, ease + 0.15) * 1.3)); easy = Math.max(easy, good + 1);
+  return [0, Math.min(CAP, hard), Math.min(CAP, good), Math.min(CAP, easy)];
+}
+function fmtIv(d) { return d === 0 ? 'сейчас' : (d < 30 ? d + ' дн.' : (d < 365 ? Math.round(d / 30) + ' мес.' : (Math.round(d / 36.5) / 10) + ' г.')); }
+function dayWords() { if (!D) return []; var by = {}; D.words.forEach(function (w) { by[w.id] = w; }); return D.day.ids.map(function (id) { return by[id]; }).filter(Boolean); }
+function gradedToday(w) { return w.graded === D.today; }
+function curInfo() {
+  var list = dayWords(); if (!list.length) return null;
+  if (S.train) { var tw = list[Math.min(S.train.i, list.length - 1)]; return { w: tw, idx: S.train.i, n: list.length, cycle: 0, train: true, sl: null }; }
+  var d = new Date(), sl = slotCalc(D.settings, list.length, d.getHours() * 60 + d.getMinutes());
+  if (sl.slot !== S.lastSlot) { S.lastSlot = sl.slot; S.off = 0; S.reveal = false; }
+  var idx = ((sl.idx + S.off) % list.length + list.length) % list.length;
+  return { w: list[idx], idx: idx, n: list.length, cycle: sl.cycle, train: false, sl: sl, auto: sl.idx };
+}
+/** Цвет слова: тот же оттенок, но яркость подбирается так, чтобы текст читался (контраст ≥ 5:1) — жёлтый и синий требуют разной яркости. */
+function hslRgb(h, s, l) { s /= 100; l /= 100; var k = function (n) { return (n + h / 30) % 12; }, a = s * Math.min(l, 1 - l), f = function (n) { return l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); }; return [f(0), f(8), f(4)].map(function (x) { return Math.round(x * 255); }); }
+function lumOf(c) { var f = function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); }
+var WCACHE = {};
+function wordColor(h) {
+  var dark = document.documentElement.getAttribute('data-theme') === 'dark', key = h + (dark ? 'd' : 'l'); if (WCACHE[key]) return WCACHE[key];
+  var card = dark ? [18, 26, 43] : [255, 255, 255], page = dark ? [10, 15, 28] : [244, 246, 251], tint = hslRgb(h, 80, 50).map(function (v, i) { return v * 0.15 + card[i] * 0.85; }), bgs = [card, page, tint].map(lumOf), S = dark ? 78 : 72, L = dark ? 64 : 44;
+  for (var i = 0; i < 70; i++) { var tl = lumOf(hslRgb(h, S, L)), worst = 99; bgs.forEach(function (b) { var r = (Math.max(tl, b) + 0.05) / (Math.min(tl, b) + 0.05); if (r < worst) worst = r; }); if (worst >= 5) break; L += dark ? 1 : -1; }
+  return (WCACHE[key] = 'hsl(' + h + ' ' + S + '% ' + L + '%)');
+}
+function markHtml(ex, word) {
+  var e = esc(ex); if (!word) return e; var re = new RegExp('(' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[a-z]{0,4})', 'ig'); return e.replace(re, '<mark>$1</mark>');
+}
+/* ---------- страница «Сейчас» ---------- */
+function renderNow() {
+  var el = $('p-now'); if (!D) { el.innerHTML = '<div class="empty"><b>Загрузка…</b></div>'; return; }
+  var ci = curInfo();
+  if (!ci) { el.innerHTML = '<div class="card empty"><b>Слов пока нет</b>Добавьте слова во вкладке «Слова» → «Импорт». Слова без перевода в набор не попадают.<div style="margin-top:14px"><button class="btn b" data-act="import">Импортировать слова</button></div></div>'; return; }
+  var w = ci.w, veil = D.settings.reveal === 'tap' && !S.reveal && !S.train;
+  var dots = ''; dayWords().forEach(function (x, i) { dots += '<i class="' + (gradedToday(x) ? 'done ' : '') + (i === ci.idx ? 'cur' : '') + '"></i>'; });
+  var iv = cardIntervals(w);
+  var status = w.status === 'known' ? 'знаю' : (w.status === 'learning' ? 'учу' : 'новое');
+  el.innerHTML = '<div class="card' + (veil ? ' veil' : '') + '" id="wcard" style="--h:' + w.hue + ';--wc:' + wordColor(w.hue) + '"><div class="tags"><span class="tag hue">' + esc(w.pos || 'слово') + '</span><span class="tag">' + status + '</span>' + (ci.train ? '<span class="tag">тренировка</span>' : '<span class="tag">круг ' + (ci.cycle + 1) + '</span>') + '</div>' +
+    '<div id="wWord">' + esc(w.word) + '</div><div id="wIpa">' + esc(w.ipa) + '</div><div id="wTr">' + esc(w.tr) + '</div>' + (w.exp ? '<div id="wExp">' + esc(w.exp) + '</div>' : '') + (w.ex ? '<div id="wEx">' + markHtml(w.ex, w.word) + '</div>' : '') +
+    (veil ? '<div class="reveal"><button class="btn b" data-act="reveal" style="width:100%">Показать перевод</button></div>' : '') + '</div>' +
+    '<div class="nav"><button class="btn" id="wPrev" data-act="prev" aria-label="Предыдущее"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div id="wTimer"></div><button class="btn" id="wSpeak" data-act="speak" aria-label="Произнести"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg></button><button class="btn" id="wNext" data-act="next" aria-label="Следующее"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>' +
+    '<div class="bar"><i id="wBar" style="width:0"></i></div><div class="hint" id="wCount" style="margin-top:8px;text-align:center">' + (ci.train ? 'Тренировка: слово ' + (ci.idx + 1) + ' из ' + ci.n + ' · <a href="#" data-act="exit">выйти</a>' : 'Слово ' + (ci.idx + 1) + ' из ' + ci.n + (S.off ? ' · <a href="#" data-act="back">к текущему</a>' : '')) + '</div>' +
+    '<div class="dots" aria-label="Прогресс дня">' + dots + '</div>' +
+    '<div class="grades"><button class="g1" data-g="1">Снова<small>' + fmtIv(iv[0]) + '</small></button><button class="g2" data-g="2">Трудно<small>' + fmtIv(iv[1]) + '</small></button><button class="g3" data-g="3">Хорошо<small>' + fmtIv(iv[2]) + '</small></button><button class="g4" data-g="4">Легко<small>' + fmtIv(iv[3]) + '</small></button></div>';
+  tick();
+}
+function tick() {
+  if (!D) return; var ti = $('wTimer'); if (!ti) return;
+  if (!S.train) { var d0 = new Date(), n0 = dayWords().length; if (n0 && slotCalc(D.settings, n0, d0.getHours() * 60 + d0.getMinutes()).slot !== S.lastSlot) { renderNow(); return; } }       // слот сменился — перерисовать до того, как curInfo отметит его
+  var ci = curInfo(); if (!ci) return;
+  if (ci.train) { ti.textContent = 'без таймера'; $('wBar').style.width = (ci.idx / ci.n * 100) + '%'; return; }
+  var left = ci.sl.next * 60 - nowSec(); if (left < 0) left = 0;
+  ti.textContent = 'через ' + pad2(Math.floor(left / 60)) + ':' + pad2(left % 60); var tot = ci.sl.interval * 60; $('wBar').style.width = Math.max(0, Math.min(100, (1 - left / tot) * 100)) + '%';
+}
+/* ---------- «Сегодня» ---------- */
+function renderToday() {
+  var el = $('p-today'); if (!D) { el.innerHTML = ''; return; } var list = dayWords(), p = D.progress;
+  if (!list.length) { el.innerHTML = '<div class="card empty"><b>Набор на сегодня пуст</b>Добавьте слова с переводом.</div>'; return; }
+  var h = '<div class="card"><h2>Сегодня: ' + p.graded + ' из ' + p.total + '</h2><div class="hint">Оцените слово — и оно вернётся по расписанию повторений. Слова без оценки завтра вернутся как повторение.</div><div class="bar"><i style="width:' + (p.total ? p.graded / p.total * 100 : 0) + '%"></i></div><div style="margin-top:12px"><button class="btn b" data-act="train" style="width:100%">Пройти все подряд</button></div></div><div class="card" style="padding:6px 14px">';
+  list.forEach(function (w, i) { h += '<div class="wrow" data-open="' + w.id + '" style="--h:' + w.hue + '"><span class="dot"></span><div class="m"><b>' + esc(w.word) + '</b><div class="t">' + esc(w.tr) + '</div></div>' + (gradedToday(w) ? '<span class="ok">✓</span>' : '') + '</div>'; });
+  el.innerHTML = h + '</div>';
+}
+/* ---------- «Слова» ---------- */
+function renderWords() {
+  var el = $('p-words'); if (!D) { el.innerHTML = ''; return; }
+  var f = S.filter, q = S.q.toLowerCase(), st = D.stats;
+  var chips = [['all', 'Все ' + st.total], ['new', 'Новые ' + st.byStatus.new], ['learning', 'Учу ' + st.byStatus.learning], ['known', 'Знаю ' + st.byStatus.known], ['notr', 'Без перевода ' + st.noTr]];
+  var list = D.words.filter(function (w) { if (f === 'notr') return !w.tr; if (f !== 'all' && w.status !== f) return false; if (q && (w.word + ' ' + w.tr).toLowerCase().indexOf(q) < 0) return false; return true; });
+  var h = '<div class="row" style="margin-bottom:10px"><input id="wSearch" type="search" placeholder="Поиск" value="' + esc(S.q) + '" aria-label="Поиск"><button class="btn b" data-act="import" style="white-space:nowrap">Импорт</button></div><div class="chips">' + chips.map(function (c) { return '<button data-f="' + c[0] + '" class="' + (f === c[0] ? 'on' : '') + '">' + c[1] + '</button>'; }).join('') + '</div>';
+  if (!list.length) h += '<div class="card empty"><b>' + (st.total ? 'Ничего не найдено' : 'Список пуст') + '</b>' + (st.total ? '' : 'Нажмите «Импорт» и вставьте слова.') + '</div>';
+  else { h += '<div class="card" style="padding:6px 14px">'; list.slice(0, 200).forEach(function (w) { h += '<div class="wrow" data-open="' + w.id + '" style="--h:' + w.hue + '"><span class="dot"></span><div class="m"><b>' + esc(w.word) + '</b><div class="t">' + esc(w.tr || '— нужен перевод —') + '</div></div></div>'; }); if (list.length > 200) h += '<div class="hint" style="padding:10px 0;text-align:center">Показаны первые 200 из ' + list.length + '. Уточните поиск.</div>'; h += '</div>'; }
+  el.innerHTML = h; var inp = $('wSearch'); if (inp && S.focusSearch) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+/* ---------- «Ещё»: статистика, настройки, виджет ---------- */
+function renderMore() {
+  var el = $('p-more'); if (!D) { el.innerHTML = ''; return; } var st = D.stats, se = D.settings, mx = Math.max.apply(null, st.last14.map(function (x) { return x.n; }).concat([1]));
+  var h = '<div class="kpis"><div class="kpi"><div class="k">Всего слов</div><div class="v">' + st.total + '</div></div><div class="kpi"><div class="k">Знаю</div><div class="v" style="color:var(--green-t)">' + st.byStatus.known + '</div></div><div class="kpi"><div class="k">Учу</div><div class="v">' + st.byStatus.learning + '</div></div><div class="kpi"><div class="k">Серия</div><div class="v">' + st.streak + ' дн.</div></div></div>' +
+    '<div class="card"><h2>Оценок за 14 дней</h2><div class="bars">' + st.last14.map(function (x) { return '<div title="' + x.d + ': ' + x.n + '"><i style="height:' + Math.round(x.n / mx * 100) + '%"></i></div>'; }).join('') + '</div><div class="bars-l">' + st.last14.map(function (x) { return '<span>' + x.d.slice(8) + '</span>'; }).join('') + '</div></div>' +
+    '<div class="card"><h2>Настройки</h2><label for="sInt">Новое слово каждые, минут</label><input id="sInt" type="number" inputmode="numeric" min="1" max="240" value="' + se.interval + '"><div class="g2c"><div><label for="sDaily">Слов в день</label><input id="sDaily" type="number" inputmode="numeric" min="1" max="100" value="' + se.daily + '"></div><div><label for="sRev">Из них повторений (до)</label><input id="sRev" type="number" inputmode="numeric" min="0" max="100" value="' + se.reviews + '"></div></div>' +
+    '<div class="g2c"><div><label for="sStart">Слова с</label><input id="sStart" type="time" value="' + se.start + '"></div><div><label for="sEnd">до</label><input id="sEnd" type="time" value="' + se.end + '"></div></div>' +
+    '<label>Перевод</label><div class="seg" id="sRevealSeg"><button data-rv="now" class="' + (se.reveal === 'now' ? 'on' : '') + '">Сразу</button><button data-rv="tap" class="' + (se.reveal === 'tap' ? 'on' : '') + '">По нажатию</button></div>' +
+    '<label>Тема</label><div class="seg" id="sThemeSeg">' + [['auto', 'Авто'], ['light', 'Светлая'], ['dark', 'Тёмная']].map(function (t) { return '<button data-th="' + t[0] + '" class="' + (se.theme === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>' +
+    '<label for="sSite">Адрес сайта (для нажатия на виджет)</label><input id="sSite" type="url" placeholder="https://имя.github.io/words/" value="' + esc(se.site_url) + '"><div style="margin-top:14px"><button class="btn b" data-act="saveset" style="width:100%">Сохранить настройки</button></div></div>' +
+    '<div class="card"><h2>Виджет на экран блокировки</h2><div class="hint">Слово в виджете меняется по тому же таймеру, что и в приложении. iOS сама решает, когда обновлять виджет, поэтому смена может задерживаться на несколько минут.</div><ol class="hint" style="padding-left:20px;margin:10px 0"><li>Установите бесплатное приложение <b>Scriptable</b> из App Store.</li><li>Нажмите кнопку ниже: код скопируется.</li><li>В Scriptable: «+» → вставьте код → назовите «Слова».</li><li>Экран блокировки → «Настроить» → «Добавить виджет» → Scriptable → выберите скрипт «Слова».</li></ol><button class="btn b" data-act="copywidget" style="width:100%">Скопировать код виджета</button></div>' +
+    '<div class="card"><h2>Слова без перевода: ' + st.noTr + '</h2><div class="hint">Скопируйте готовую просьбу, вставьте её в чат с Claude — он вернёт перевод и объяснения в нужном формате. Результат вставьте в «Импорт».</div><div style="margin-top:12px"><button class="btn" data-act="copyprompt" style="width:100%"' + (st.noTr ? '' : ' disabled') + '>Скопировать список для перевода</button></div></div>' +
+    '<div class="hint" style="text-align:center;margin:6px 0 20px">Версия ' + esc(D.version) + '</div>';
+  el.innerHTML = h;
+}
+/* ---------- окно ---------- */
+function sheetOpen(title, html, mount) { $('sheetT').textContent = title; $('sheetB').innerHTML = html; $('sheetBg').classList.add('on'); $('sheet').classList.add('on'); if (mount) mount($('sheetB')); }
+function sheetClose() { $('sheetBg').classList.remove('on'); $('sheet').classList.remove('on'); }
+function openEdit(id) {
+  var w = D.words.find(function (x) { return x.id === id; }); if (!w) return;
+  sheetOpen('Слово', '<label for="eWord">Слово</label><input id="eWord" maxlength="80" value="' + esc(w.word) + '"><label for="eTr">Перевод</label><input id="eTr" maxlength="300" value="' + esc(w.tr) + '"><label for="eExp">Объяснение</label><textarea id="eExp" style="min-height:90px;font-family:inherit" maxlength="600">' + esc(w.exp) + '</textarea><label for="eEx">Пример</label><input id="eEx" maxlength="400" value="' + esc(w.ex) + '"><div class="g2c"><div><label for="ePos">Часть речи</label><input id="ePos" maxlength="20" value="' + esc(w.pos) + '"></div><div><label for="eIpa">Транскрипция</label><input id="eIpa" maxlength="40" value="' + esc(w.ipa) + '"></div></div><div class="g2c" style="margin-top:16px"><button class="btn red" data-act="del" data-id="' + w.id + '">Удалить</button><button class="btn b" data-act="saveedit" data-id="' + w.id + '">Сохранить</button></div>');
+}
+/* ---------- импорт ---------- */
+function parseImport(text) {
+  var lines = String(text || '').replace(/\r/g, '').split('\n').map(function (l) { return l.trim(); }).filter(Boolean), rows = [], bad = [];
+  if (!lines.length) return { rows: rows, bad: bad };
+  var seps = ['\t', '|', ';', ' — ', ' – ', ' - '], best = null, bc = 0;
+  seps.forEach(function (s) { var c = lines.filter(function (l) { return l.indexOf(s) > -1; }).length; if (c > bc) { bc = c; best = s; } });
+  var csv = !best && lines.filter(function (l) { return /^"?[A-Za-z][^,]{0,60}"?\s*,/.test(l); }).length >= Math.ceil(lines.length * 0.6);
+  lines.forEach(function (l, i) {
+    var f; if (best) f = l.split(best).map(function (x) { return x.trim(); }); else if (csv) f = csvSplit(l); else f = [l];
+    if (i === 0 && /^(word|слово|term|термин)$/i.test(f[0] || '') ) return;
+    var r = { w: (f[0] || '').replace(/^["']|["']$/g, '').trim(), tr: f[1] || '', exp: f[2] || '', ex: f[3] || '', pos: f[4] || '', ipa: f[5] || '' };
+    if (!r.w || r.w.length > 80 || !/[A-Za-z\u00C0-\u024F]/.test(r.w)) { bad.push(l.slice(0, 50)); return; } rows.push(r);
+  });
+  return { rows: rows, bad: bad, sep: best || (csv ? 'запятая' : null) };
+}
+function csvSplit(l) { var out = [], cur = '', q = false; for (var i = 0; i < l.length; i++) { var c = l[i]; if (q) { if (c === '"') { if (l[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; } else if (c === '"') q = true; else if (c === ',') { out.push(cur.trim()); cur = ''; } else cur += c; } out.push(cur.trim()); return out; }
+function importPreview() {
+  var p = parseImport($('imText').value), have = {}; D.words.forEach(function (w) { have[w.word.toLowerCase()] = w; });
+  var seen = {}, nw = 0, up = 0, same = 0, list = [];
+  p.rows.forEach(function (r) { var k = r.w.toLowerCase(); if (seen[k]) return; seen[k] = true; var c = have[k]; if (!c) nw++; else if ((r.tr && r.tr !== c.tr) || (r.exp && r.exp !== c.exp) || (r.ex && r.ex !== c.ex) || (r.pos && r.pos !== c.pos) || (r.ipa && r.ipa !== c.ipa)) up++; else same++; if (list.length < 6) list.push(r); });
+  S.imp = p.rows; var noTr = p.rows.filter(function (r) { return !r.tr; }).length;
+  $('imPrev').innerHTML = p.rows.length ? '<div><b>Новых: ' + nw + '</b> · обновится: ' + up + ' · без изменений: ' + same + (noTr ? ' · без перевода: ' + noTr : '') + (p.bad.length ? ' · пропущено строк: ' + p.bad.length : '') + '</div><div class="pv">' + list.map(function (r) { return '<div><b>' + esc(r.w) + '</b> — ' + esc(r.tr || '…') + '</div>'; }).join('') + '</div>' : '<span class="hint">Вставьте слова — здесь появится предпросмотр.</span>';
+  $('imGo').disabled = !(nw || up);
+}
+function openImport() {
+  sheetOpen('Импорт слов', '<div class="hint">Одно слово в строке. Поля через « | », «;», табуляцию или « — »:<br><b>слово | перевод | объяснение | пример | часть речи</b><br>Достаточно одного слова: перевод можно добавить позже, повторный импорт дополнит слово.</div><label for="imText">Список</label><textarea id="imText" placeholder="cat | кошка | домашнее животное | The cat sleeps. | n.&#10;ubiquitous | повсеместный | встречающийся везде | Phones are ubiquitous. | adj."></textarea><div id="imPrev" style="margin-top:10px"></div><div style="margin-top:14px"><button class="btn b" id="imGo" style="width:100%" disabled>Добавить</button></div>', function () {
+    $('imText').addEventListener('input', importPreview); importPreview();
+    $('imGo').onclick = function () { var rows = S.imp || []; if (!rows.length) return; var b = this; b.disabled = true; b.textContent = 'Добавляю…'; var i = 0, tot = { a: 0, u: 0 };
+      (function next() { if (i >= rows.length) { b.textContent = 'Готово'; toast('Добавлено: ' + tot.a + ', обновлено: ' + tot.u); setTimeout(function () { sheetClose(); load(true); }, 400); return; }
+        var chunk = rows.slice(i, i + 150), before = D.stats.total; srv('wImport', { rows: chunk }, function (r) { var added = r.stats.total - before; tot.a += added; D = r; i += 150; b.textContent = 'Добавляю… ' + Math.min(i, rows.length) + ' / ' + rows.length; next(); }, function (e) { b.disabled = false; b.textContent = 'Добавить'; onErr(e); }); })(); };
+  });
+}
+/* ---------- действия ---------- */
+function speak(t) { try { var u = new SpeechSynthesisUtterance(t); u.lang = 'en-US'; u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { toast('Озвучка недоступна', true); } }
+function copyText(txt, okMsg) {
+  var done = false; try { var ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;min-height:0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, 9999999); done = document.execCommand('copy'); document.body.removeChild(ta); } catch (e) { done = false; }
+  if (!done && navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt).then(function () { toast(okMsg); }, function () { postTop({ type: 'trf-copy', text: txt }); toast('Не удалось скопировать', true); }); return; }
+  if (!done) postTop({ type: 'trf-copy', text: txt }); toast(done ? okMsg : 'Не удалось скопировать', !done);
+}
+function widgetCode() { return WIDGET_TPL.replace('__API__', D.exec || '').replace('__KEY__', VIEW_KEY).replace('__APP__', (D.settings.site_url ? D.settings.site_url + '?k=' + VIEW_KEY : (D.exec || '') + '?k=' + VIEW_KEY)); }
+function promptNoTr() {
+  var ws = D.words.filter(function (w) { return !w.tr; }).map(function (w) { return w.word; });
+  return 'Переведи английские слова на русский. Для каждого слова дай ОДНУ строку в формате:\nслово | перевод | простое объяснение (если слово сложное или это термин) | короткий пример на английском | часть речи (n., v., adj., adv.)\nБез нумерации, без пояснений вне формата, по строке на слово, в том же порядке.\n\nСлова:\n' + ws.join('\n');
+}
+function grade(g) {
+  var ci = curInfo(); if (!ci || S.busy) return; S.busy = true; var id = ci.w.id;
+  srv('wGrade', { id: id, grade: g }, function (r) { S.busy = false; var i = D.words.findIndex(function (x) { return x.id === id; }); if (i > -1) D.words[i] = r.word; D.progress = r.progress; D.stats = r.stats; toast(g === 1 ? 'Вернётся скоро' : 'Следующее повторение через ' + fmtIv(r.word.ivl));
+    if (S.train) { S.train.i++; if (S.train.i >= ci.n) { S.train = null; toast('Тренировка завершена'); } } render(); }, function (e) { S.busy = false; onErr(e); });
+}
+function goPage(p) { S.page = p; ['now', 'today', 'words', 'more'].forEach(function (x) { $('p-' + x).classList.toggle('on', x === p); }); Array.prototype.forEach.call(document.querySelectorAll('#nav button'), function (b) { b.classList.toggle('on', b.dataset.go === p); }); $('main').scrollTop = 0; render(); }
+function render() {
+  if (!D) return; var st = D.stats; $('chip').textContent = D.progress.graded + '/' + D.progress.total; $('title').textContent = { now: 'Сейчас', today: 'Сегодня', words: 'Слова', more: 'Ещё' }[S.page];
+  if (S.page === 'now') renderNow(); else if (S.page === 'today') renderToday(); else if (S.page === 'words') renderWords(); else renderMore();
+}
+function applyTheme() { var t = (D && D.settings.theme) || LS('wd_theme') || 'auto'; var dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches); document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light'); LS('wd_theme', t); }
+var firstOk = false;
+function load(silent) {
+  if (S.loading) return; S.loading = true;
+  srv('wGetAll', {}, function (r) { S.loading = false; D = r; D.loadedAt = Date.now(); applyTheme(); render(); if (!firstOk) { firstOk = true; postTop({ type: 'trf-ready' }); } }, function (e) { S.loading = false; if (!silent) onErr(e); });
+}
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('[data-go],[data-act],[data-g],[data-open],[data-f],[data-rv],[data-th]'); if (!t) return;
+  if (t.dataset.go) { goPage(t.dataset.go); return; }
+  if (t.dataset.g) { grade(+t.dataset.g); return; }
+  if (t.dataset.open) { openEdit(t.dataset.open); return; }
+  if (t.dataset.f) { S.filter = t.dataset.f; renderWords(); return; }
+  if (t.dataset.rv) { Array.prototype.forEach.call(document.querySelectorAll('#sRevealSeg button'), function (b) { b.classList.toggle('on', b === t); }); return; }
+  if (t.dataset.th) { Array.prototype.forEach.call(document.querySelectorAll('#sThemeSeg button'), function (b) { b.classList.toggle('on', b === t); }); return; }
+  var a = t.dataset.act; if (e.target.tagName === 'A') e.preventDefault();
+  if (a === 'reveal') { S.reveal = true; renderNow(); }
+  else if (a === 'next' || a === 'prev') { var ci = curInfo(); if (!ci) return; if (ci.train) { S.train.i = Math.max(0, Math.min(ci.n - 1, S.train.i + (a === 'next' ? 1 : -1))); } else { S.off += (a === 'next' ? 1 : -1); S.reveal = false; } renderNow(); }
+  else if (a === 'back') { S.off = 0; renderNow(); } else if (a === 'exit') { S.train = null; renderNow(); }
+  else if (a === 'speak') { var c = curInfo(); if (c) speak(c.w.word); }
+  else if (a === 'train') { if (!dayWords().length) return; S.train = { i: 0 }; goPage('now'); }
+  else if (a === 'import') openImport();
+  else if (a === 'saveedit') { var id = t.dataset.id; srv('wEdit', { id: id, word: $('eWord').value, tr: $('eTr').value, exp: $('eExp').value, ex: $('eEx').value, pos: $('ePos').value, ipa: $('eIpa').value }, function (r) { D = r; sheetClose(); render(); toast('Сохранено'); }); }
+  else if (a === 'del') { if (t.dataset.c !== '1') { t.dataset.c = '1'; t.textContent = 'Нажмите ещё раз'; setTimeout(function () { if (t) { t.dataset.c = '0'; t.textContent = 'Удалить'; } }, 3500); return; } srv('wDelete', { id: t.dataset.id }, function (r) { D = r; sheetClose(); render(); toast('Удалено'); }); }
+  else if (a === 'saveset') {
+    var seg = function (id, attr) { var b = document.querySelector('#' + id + ' button.on'); return b ? b.dataset[attr] : undefined; };
+    srv('wSetSettings', { interval: +$('sInt').value, daily: +$('sDaily').value, reviews: +$('sRev').value, start: $('sStart').value, end: $('sEnd').value, reveal: seg('sRevealSeg', 'rv'), theme: seg('sThemeSeg', 'th'), site_url: $('sSite').value.trim() }, function (r) { D = r; S.lastSlot = -1; applyTheme(); render(); toast('Настройки сохранены'); });
+  }
+  else if (a === 'copywidget') copyText(widgetCode(), 'Код виджета скопирован');
+  else if (a === 'copyprompt') copyText(promptNoTr(), 'Список для перевода скопирован');
+});
+$('sheetBg').addEventListener('click', sheetClose); $('sheetX').addEventListener('click', sheetClose);
+$('main').addEventListener('input', function (e) { if (e.target.id === 'wSearch') { S.q = e.target.value; S.focusSearch = true; renderWords(); S.focusSearch = false; } });
+document.addEventListener('visibilitychange', function () { if (!document.hidden) { if (D && (D.today !== localToday() || Date.now() - D.loadedAt > 60000)) load(true); else render(); } });
+setInterval(function () { if (!document.hidden && S.page === 'now') tick(); }, 1000);
+setInterval(function () { if (D && !document.hidden && D.today !== localToday()) load(true); }, 30000);
+applyTheme(); render(); load(false);
+</script>
+</body>
+</html>
