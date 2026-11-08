@@ -7,7 +7,7 @@ const WRAP = fs.readFileSync((ROOT + '/github/index.html'), 'utf8'), WV = JSON.p
 const ID = 'AKfycbTEST1234567890abcdefghij', TOK = 'tokenTOKENtoken1234567890abcd';
 const INNER = '<!doctype html><meta charset=utf-8><body style="margin:0"><script>setTimeout(function(){ parent.postMessage({ trf: 1, type: "trf-ready" }, "*"); }, 200);</script>';
 async function page(b, o) {
-  o = o || {}; const p = await b.newPage(); await p.setViewport({ width: 393, height: 852, deviceScaleFactor: 2, isMobile: true, hasTouch: true }); const st = { versionHits: 0, loads: 0, vjson: o.vjson || WV };
+  o = o || {}; const p = await b.newPage(); await p.setViewport({ width: 393, height: 852, deviceScaleFactor: 2, isMobile: true, hasTouch: true }); if (o.scheme) await p.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: o.scheme }]); const st = { versionHits: 0, loads: 0, vjson: o.vjson || WV };
   await p.setRequestInterception(true);
   p.on('request', r => { const u = r.url();
     if (/^https:\/\/usmle\.test\/version\.json/.test(u)) { st.versionHits++; r.respond({ status: 200, contentType: 'application/json', body: JSON.stringify({ v: st.vjson }) }); }
@@ -51,6 +51,15 @@ const panels = p => p.evaluate(() => ['splash', 'setup', 'slow', 'offline', 'bad
   check('trf-open: открываются только адреса сайта и Google Apps Script', await p.evaluate(() => window.__opened), [link, 'https://script.google.com/macros/s/' + ID + '/exec?s=' + TOK]);
   await p.evaluate(() => window.postMessage({ trf: 1, type: 'trf-copy', text: 'ЧУЖОЕ' }, '*')); await sleep(250);
   check('сообщение не от Google (с самой страницы) игнорируется', await p.evaluate(() => window.__copied.length), 1); await p.close();
+  console.log('\n=== ВЕРХНЯЯ ПОЛОСА ТЕЛЕФОНА: СТИЛЬ ПО ТЕМЕ ПРИ ЗАПУСКЕ ===');
+  { const read = p => p.evaluate(() => ({ sb: document.querySelector('meta[name=apple-mobile-web-app-status-bar-style]').content, tc: document.querySelector('meta[name=theme-color]').content, th: document.documentElement.getAttribute('data-theme'), bg: document.documentElement.style.background }));
+    const run = async (pref, sys) => { const ls = { trf_lang: 'ru', trf_exec: 'https://script.google.com/macros/s/' + ID + '/exec', trf_key: 'KEY123456789ABCDEF' }; if (pref !== undefined) ls.trf_theme_pref = pref; ({ p } = await page(b, { ls, scheme: sys })); const r = await read(p); await p.close(); return r; };
+    const cases = [['dark', 'light', 'black', '#080C16', 'dark'], ['light', 'dark', 'default', '#F3F4F8', 'light'], [undefined, 'dark', 'black', '#080C16', 'dark'], [undefined, 'light', 'default', '#F3F4F8', 'light'], ['auto', 'dark', 'black', '#080C16', 'dark'], ['auto', 'light', 'default', '#F3F4F8', 'light'], ['мусор', 'dark', 'black', '#080C16', 'dark'], ['dark', 'dark', 'black', '#080C16', 'dark'], ['light', 'light', 'default', '#F3F4F8', 'light']];
+    for (const c of cases) { const r = await run(c[0], c[1]); check('выбор в приложении «' + (c[0] === undefined ? 'не задан' : c[0]) + '», тема телефона «' + c[1] + '» → стиль полосы «' + c[2] + '», цвет ' + c[3] + ', тема ' + c[4], [r.sb, r.tc, r.th], [c[2], c[3], c[4]]); }
+    ({ p } = await page(b, { ls: { trf_lang: 'ru', trf_exec: 'https://script.google.com/macros/s/' + ID + '/exec', trf_key: 'KEY123456789ABCDEF' } })); const f9 = () => p.frames().find(f => /script\.google\.com/.test(f.url())); 
+    for (const [pref, ok] of [['dark', true], ['light', true], ['auto', true], ['rose', false], ['', false], [null, false]]) { await p.evaluate(() => localStorage.removeItem('trf_theme_pref')); await f9().evaluate(pf => parent.postMessage({ trf: 1, type: 'trf-theme', theme: 'dark', bg: '#080C16', pref: pf }, '*'), pref); await sleep(250);
+      check('приложение сообщает выбор «' + pref + '»: ' + (ok ? 'запоминается для следующего запуска' : 'отклоняется (не записывается)'), await p.evaluate(() => localStorage.getItem('trf_theme_pref')), ok ? pref : null); }
+    check('при смене темы обёртка сразу красит фон и цвет верхней панели браузера (theme-color) под тему приложения', await p.evaluate(() => [document.documentElement.getAttribute('data-theme'), document.querySelector('meta[name=theme-color]').content]), ['dark', '#080C16']); await p.close(); }
   console.log('\n=== СМЕНА КЛЮЧА (trf-setkey) ===');
   { const NEWK = 'AbC_123-' + 'x'.repeat(32); ({ p } = await page(b, { ls: { trf_lang: 'ru', trf_exec: 'https://script.google.com/macros/s/' + ID + '/exec', trf_key: 'KEY123456789ABCDEF' } }));
     const f2 = () => p.frames().find(f => /script\.google\.com/.test(f.url())); const snd = m => f2().evaluate(m => parent.postMessage(Object.assign({ trf: 1 }, m), '*'), m);

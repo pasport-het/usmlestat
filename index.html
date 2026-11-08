@@ -9,6 +9,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://script.google.com"><link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<script>/* Верхняя полоса телефона и фон под цвет выбранной темы ещё до первой отрисовки (без белой вспышки). iOS читает стиль полосы при запуске. */
+(function () { try { var p = localStorage.getItem('trf_theme_pref'), sys = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches, dark = p === 'dark' || (p !== 'light' && sys), bg = dark ? '#080C16' : '#F3F4F8';
+  var m = document.querySelector('meta[name=apple-mobile-web-app-status-bar-style]'); if (m) m.setAttribute('content', dark ? 'black' : 'default');
+  var t = document.querySelector('meta[name=theme-color]'); if (t) t.setAttribute('content', bg);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light'); document.documentElement.style.background = bg; } catch (e) { } })();</script>
 <meta name="apple-mobile-web-app-title" content="USMLE">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -99,7 +106,7 @@
 <script>
 (function () {
   'use strict';
-  var WRAP_V = '2026-11-05.1';                                      // версия оболочки: обновляется при каждом выпуске вместе с version.json
+  var WRAP_V = '2026-11-06.1';                                      // версия оболочки: обновляется при каждом выпуске вместе с version.json
   var SHARE = null;                                                  // режим ссылки для друга: { exec, tok }
   var K_U = 'trf_exec', K_K = 'trf_key', K_L = 'trf_lang', K_S = 'trf_summary', K_P = 'trf_vapid';
   var HK = window.__TRF || {};                                   // переопределения для автотестов
@@ -335,7 +342,7 @@
     var d = e.data; if (!d || d.trf !== 1) return;
     if (d.type === 'trf-ready') { loaded = true; everLoaded = true; clearTimeout(readyTimer); hideSplash(); hide('slow'); syncPush(); }
     else if (d.type === 'trf-reload') loadApp(true);
-    else if (d.type === 'trf-theme') applyTheme(d.theme, d.bg);
+    else if (d.type === 'trf-theme') { applyTheme(d.theme, d.bg); if (d.pref === 'auto' || d.pref === 'light' || d.pref === 'dark') { try { localStorage.setItem('trf_theme_pref', d.pref); } catch (e) { } } }
     else if (d.type === 'trf-prefs') { if (d.lang === 'en' || d.lang === 'ru') { lang = d.lang; LS(K_L, lang); applyLang(); } }
     else if (d.type === 'trf-summary' && d.s) LS(K_S, JSON.stringify({ at: Date.now(), s: d.s }));
     else if (d.type === 'trf-install') install();

@@ -50,7 +50,7 @@ const PROBE = () => { const lum = c => { const f = v => { v /= 255; return v <= 
   await inject("setTimeout(function () { throw new Error('тест-сбой интерфейса'); }, 10);"); await sleep(500);
   await inject("Promise.reject(new Error('тест-сбой обещания'));"); await sleep(500);
   const e1 = errorsSummary_();
-  check('необработанная ошибка и отклонённое обещание попадают в таблицу с версией и страницей; сообщение с файлом и строкой', [e1.count, e1.last.map(x => x.msg.replace(/@.*/, '').trim()).sort(), e1.last.every(x => x.ver === 'v5.2.0' && x.page === 'map')], [2, ['тест-сбой обещания', 'Uncaught Error: тест-сбой интерфейса'].sort(), true]);
+  check('необработанная ошибка и отклонённое обещание попадают в таблицу с версией и страницей; сообщение с файлом и строкой', [e1.count, e1.last.map(x => x.msg.replace(/@.*/, '').trim()).sort(), e1.last.every(x => /^v5\.\d+\.\d+$/.test(x.ver) && x.page === 'map')], [2, ['тест-сбой обещания', 'Uncaught Error: тест-сбой интерфейса'].sort(), true]);
   await p.evaluate(() => { window.dispatchEvent(new ErrorEvent('error', { message: 'ResizeObserver loop completed with undelivered notifications.' })); window.dispatchEvent(new ErrorEvent('error', { message: 'Script error.' })); }); await sleep(400);
   check('шум браузера («ResizeObserver loop…», «Script error.») не пишется', errorsSummary_().count, 2);
   await p.evaluate(() => { for (let i = 0; i < 10; i++) window.dispatchEvent(new ErrorEvent('error', { message: 'сбой номер ' + i })); }); await sleep(900);

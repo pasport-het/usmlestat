@@ -27,7 +27,7 @@ const T = '2026-10-12';
   console.log('\n=== НЕ МЕШАЕТ: ВВОД, ОКНО, СОХРАНЕНИЕ ===');
   global.VERSION = V0; VERSION = V0; p = await open(); global.VERSION = 'v9.9.9'; VERSION = 'v9.9.9';
   await p.evaluate(() => { goto('fa'); }); await sleep(300);
-  await p.evaluate(() => { document.getElementById('f-pages').focus(); refreshNow(false); }); await sleep(900);
+  await p.evaluate(() => { const c = document.querySelector('[data-coll=faLog]'); if (c && !c.classList.contains('open')) c.querySelector(':scope > .card-h').click(); document.getElementById('f-pages').focus(); refreshNow(false); }); await sleep(900);   // форма ввода теперь в сворачиваемом блоке
   await sleep(5500);
   check('пока человек вводит (курсор в поле) — не перезапускается', await p.evaluate(() => [REF.newVer, window.__r, document.activeElement && document.activeElement.id]), [true, 0, 'f-pages']);
   await p.evaluate(() => document.activeElement.blur()); await sleep(5600);

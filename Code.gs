@@ -11,7 +11,7 @@
  * Все листы и заголовки создаются автоматически.
  */
 
-const VERSION = 'v5.2.0';
+const VERSION = 'v5.3.0';
 
 const SH = {
   SET: 'Sozlamalar', FA: 'FirstAid', LOG: 'Kunlik', UW: 'UWorld', NBME: 'NBME',
@@ -384,11 +384,7 @@ function doGet(e) {
   const q = (e && e.parameter) || {};
   tpl.envJs = JSON.stringify({ emb: q.emb === '1', standalone: q.env === 'standalone', ios: q.ios === '1',
     site: String(getSettings().site_url || '') }).replace(/</g, '\\u003c');
-  let init = 'null';
-  try {                                                  // данные кладём прямо в страницу: первый экран без лишнего запроса к серверу
-    init = JSON.stringify(build_()).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
-  } catch (err) { init = 'null'; }
-  tpl.initJs = init;
+  tpl.initJs = 'null';                                                         // данные приложение запросит само (ранний запрос): страница приходит сразу, не дожидаясь чтения всех листов
   return tpl.evaluate()
     .setTitle('USMLE Progress')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')

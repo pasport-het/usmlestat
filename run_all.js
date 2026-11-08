@@ -14,7 +14,7 @@ const fast = [
   S('Слова: сервер', path.join(ROOT, 'words'), [[...N, 'tests/test_words.js']]), S('Слова: формула слота', path.join(ROOT, 'words'), [[...N, 'tests/diff_slot_run.js', '1'], ['python3', 'tests/diff_slot_spec.py']]), S('Слова: виджет', path.join(ROOT, 'words'), [[...N, 'tests/test_widget.js']]),
 ];
 const browser = [
-  ...['test_tutor', 'test_mascot', 'test_share_ui', 'test_update', 'test_video_ui', 'test_tabbar', 'test_v520_ui', 'test_wrapper', 'audit_ui'].map(t => S('Браузер: ' + t, ROOT, [[...N, 'tests/' + t + '.js']])),
+  ...['test_tutor', 'test_mascot', 'test_share_ui', 'test_update', 'test_video_ui', 'test_tabbar', 'test_v520_ui', 'test_speed', 'test_viz', 'test_wrapper', 'audit_ui'].map(t => S('Браузер: ' + t, ROOT, [[...N, 'tests/' + t + '.js']])),
   ...['test_words_ui', 'test_sw_w', 'test_wrapper_w'].map(t => S('Слова, браузер: ' + t, path.join(ROOT, 'words'), [[...N, 'tests/' + t + '.js']])),
 ];
 const list = mode === 'browser' ? browser : mode === 'all' ? fast.concat(browser) : fast; let failed = [];

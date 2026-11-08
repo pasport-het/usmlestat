@@ -17,10 +17,14 @@ self.addEventListener('fetch', function (e) {
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;               // Google, YouTube и пр. — напрямую
   if (/\/version\.json$/.test(url.pathname)) return;               // проверка версии — всегда напрямую из сети, не из кэша
-  if (req.mode === 'navigate') {                                  // страница: сначала сеть (свежая версия), без сети — из кэша
-    e.respondWith(fetch(req).then(function (res) {
-      var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put('index.html', copy); }); return res;
-    }).catch(function () { return caches.match('index.html').then(function (r) { return r || caches.match('./'); }); }));
+  if (req.mode === 'navigate') {                                  // навигация: сеть, но не дольше 1,5 с — при медленной сети открываем сохранённую копию, свежая подгружается в фоне
+    e.respondWith(new Promise(function (resolve) {
+      var done = false, cached = null;
+      caches.match('index.html').then(function (r) { cached = r || null; });
+      var tm = setTimeout(function () { if (!done && cached) { done = true; resolve(cached); } }, 1500);
+      fetch(req).then(function (res) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put('index.html', copy); }); clearTimeout(tm); if (!done) { done = true; resolve(res); } })
+        .catch(function () { clearTimeout(tm); if (!done) { done = true; caches.match('index.html').then(function (r) { resolve(r || caches.match('./')); }); } });
+    }));
     return;
   }
   e.respondWith(caches.match(req).then(function (hit) {           // иконки и манифест: сначала кэш
