@@ -1,5 +1,0 @@
-const { loadServer } = require('./hw.js'); loadServer(); const fs = require('fs');
-function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-const R = rng(Number(process.argv[2] || 1)), ri = (a, b) => a + Math.floor(R() * (b - a + 1)), hh = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'), out = [];
-for (let i = 0; i < 4000; i++) { const iv = ri(1, 240), st = ri(0, 1300), en = Math.min(1440, st + iv + ri(0, 1440 - st - iv > 0 ? 1440 - st - iv : 0)), n = ri(0, 60), m = ri(0, 1439); if (en - st < iv) continue; const s = slot_({ start: hh(st), end: en === 1440 ? '24:00' : hh(en), interval: String(iv) }, n, m); out.push({ st, en, iv, n, m, r: { slot: s.slot, slots: s.slots, idx: s.idx, cycle: s.cycle, next: s.next } }); }
-fs.writeFileSync('/tmp/diff_slot.json', JSON.stringify(out)); console.log('сценариев:', out.length);
