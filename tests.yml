@@ -1,0 +1,24 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  fast:                      # без браузера: сервер, эталоны Python, синтаксис — быстро и надёжно
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+  browser:                   # с браузером (Chromium из @sparticuz/chromium); не проверялся в GitHub Actions — при первом запуске возможны правки
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: npm install --no-audit --no-fund
+      - run: npm run test:browser

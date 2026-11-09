@@ -1,0 +1,4 @@
+const { loadServer, fresh } = require('./h.js'); global.fresh = fresh; loadServer(); const seedRich = require('./seed_rich.js'); const S = require('./shots.js'); const sleep = ms => new Promise(r => setTimeout(r, ms)); const T = '2026-11-05';
+(async () => { global.SERVER_TODAY_FORCE_ = T; seedRich(T); const b = await S.launch(); const p = await S.openPage(b, { raf: true, init: getAll(T), wait: 2500, w: 393, h: 852, now: T + 'T10:00:00Z', key: getSettings().api_key, ls: { trf_snap: null }, env: { emb: true }, lazy: process.env.LAZY === '1' });
+  const r = await p.evaluate(() => { const out = []; for (let i = 0; i < 9; i++) { const t0 = performance.now(); renderAll(); out.push(performance.now() - t0); } out.sort((a, b) => a - b); return { median: +out[4].toFixed(1), min: +out[0].toFixed(1), max: +out[8].toFixed(1) }; });
+  console.log(JSON.stringify(r)); await b.close(); })();
